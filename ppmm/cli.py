@@ -26,7 +26,8 @@ def ls():
     for name, url in mirrors.items():
         stars = "*" if url == get_current_mirror().stdout.strip() else " "
         stars = click.style(stars, fg="green")
-        output_lines.append(f"{stars.ljust(2)} {name.ljust(10)} {url}")
+        name += ' '
+        output_lines.append(f"{stars} {name.ljust(14,'-')} {url}")
     click.echo("\n".join(output_lines))
 
 
@@ -50,7 +51,8 @@ def test():
         if name == key:
             stars = click.style("*", fg="green")
             time = click.style(time, bg="green")
-        output_lines.append(f"{stars.ljust(1)} {name.ljust(10)} {time}")
+        name += ' '
+        output_lines.append(f"{stars} {name.ljust(14,'-')} {time}")
     click.echo("\n".join(output_lines))
 
 

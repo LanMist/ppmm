@@ -1,109 +1,107 @@
 # PPMM - Python Pip Mirror Manager
 
-English documentation: [README.md](https://github.com/Xu-Lan/ppmm/blob/main/README.md)
+ppmm 是一个命令行工具，用于管理 Python 包管理器（pip）的源。它允许您轻松地列出、切换、测试 pip 源，以及添加、修改、删除和重命名源。
 
-中文文档: [README-zh.md](https://github.com/Xu-Lan/ppmm/blob/main/README-zh.md)
+**简体中文**  |  [**English**](./README.en.md)
 
-ppmm is a command-line tool for managing Python package manager (pip) mirrors. It allows you to easily list、switch、 test pip mirrors, as well as add、 edit、delete、and rename mirrors.
+## 特性
 
-## Features
+- 使用 `mm ls` 列出可用源
+- 使用 `mm use <name>` 切换源
+- 使用 `mm test` 测试源的响应时间
+- 使用 `mm current` 显示当前使用的源
+- 使用 `mm add <name> <URL>` 添加新的源
+- 使用 `mm edit <name> <URL>` 修改指定的源
+- 使用 `mm rm <name>` 删除指定的源
+- 使用 `mm rename <old name>  <new name>` 重命名源
+- 使用 `mm help` 显示帮助信息
 
-- Use `mm ls` to list available mirrors
-- Use `mm use <name>` to switch mirrors
-- Use `mm test` to test the response time of mirrors
-- Use `mm current` to display the currently used mirror
-- Use `mm add <name> <URL>` to add a new mirror
-- Use `mm edit <name> <URL>` to modify a specified mirror
-- Use `mm rm <name>` to delete a specified mirror
-- Use `mm rename <old name> <new name>` to rename a mirror
-- Use `mm help` to display help information
+## 安装
 
-## Installation
-
-You can install ppmm using pip:
+您可以使用 pip 安装 ppmm：
 
 ```bash
 pip install ppmm
 ```
 
-## Usage
+## 使用方法
 
-### Listing mirrors
+### 列出源
 
-List all available mirrors:
+列出所有可用源：
 
 ```bash
 mm ls
 ```
 
-### Switching mirrors
+### 切换源
 
-Switch to a specific mirror, for example，Alibaba Cloud:
+切换到特定源，例如 阿里云：
 
 ```bash
 mm use ali
 ```
 
-### Testing mirrors
+### 测试源
 
-Test the response time of all mirrors:
+测试所有源的响应时间：
 
 ```bash
 mm test
 ```
 
-### Viewing Current mirror
+### 查看当前源
 
-Check the currently used mirror:
+检查当前使用的源：
 
 ```bash
 mm current
 ```
 
-### Adding a New mirror
+### 添加新的源
 
-Add a new mirror:
+添加一个新的源：
 
 ```bash
 mm add <name> <URL>
 ```
 
-### Edit a mirror
+### 修改源
 
-Edit the URL of a mirror:
+修改镜像的URL:
 
 ```bash
 mm edit <name> <URL>
 ```
 
-### Deleting a mirror
+### 删除源
 
-Delete an existing mirror:
+删除一个已存在的源：
 
 ```bash
 mm rm <name>
 ```
 
-### Renaming a mirror
+### 重命名源
 
-Rename a mirror:
+重命名一个源：
 
 ```bash
-mm rename <old name> <new name>
+mm rename <old name>  <new name>
 ```
 
-### Help
+### 帮助
 
-Display help information:
+显示帮助信息：
 
 ```bash
 mm help
 ```
 
-## Contributing
+## 贡献
 
-Contributions are welcome! Please raise issues or submit pull requests.
+欢迎贡献！请提出问题或提交拉取请求。
 
-## License
+## 许可证
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/Xu-Lan/ppmm/blob/main/LICENSE) file for details.
+本项目采用 MIT 许可证 - 详见 [LICENSE](./LICENSE) 文件。
