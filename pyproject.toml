@@ -13,7 +13,7 @@ requires-python = ">=3.6"
 mm = "ppmm.cli:main"
 
 [project.urls]
-repository = "https://github.com/Xu-Lan/ppmm"
+repository = "https://github.com/LanMist/ppmm"
 
 [tool.setuptools]
 include-package-data = true
