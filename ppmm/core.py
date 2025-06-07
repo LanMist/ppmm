@@ -1,5 +1,6 @@
 import http.client
 import json
+import socket
 import subprocess
 import time
 import urllib.error
@@ -37,11 +38,12 @@ def echo(message, color=Colors.RESET):
 
 
 def get_current_mirror():
-    """获取当前pip镜像源"""
+    """获取当前pip镜像源，直接返回URL字符串"""
     result = subprocess.run(
         ["pip", "config", "get", "global.index-url"], capture_output=True, text=True
     )
-    return result
+    return result.stdout.strip() if result.returncode == 0 else None
+
 
 def save_config():
     """保存配置到文件"""
@@ -52,12 +54,10 @@ def save_config():
 
 def ls():
     """列出所有镜像源"""
-    current_result = get_current_mirror()
-    current_mirror = current_result.stdout.strip() if current_result.stdout else None
+    current_mirror = get_current_mirror()
 
     echo("\n可用镜像源列表:", Colors.BOLD)
     for name, url in mirrors.items():
-        # 当前使用的镜像源用绿色星号标记
         star = f"{Colors.GREEN}*{Colors.RESET}" if url == current_mirror else " "
         echo(f"  {star} {name.ljust(14, '-')} {url}")
     print()
@@ -86,23 +86,20 @@ def use(name):
 
 def current():
     """显示当前使用的镜像源"""
-    result = get_current_mirror()
-    if result.stdout:
-        current_mirror = result.stdout.strip()
+    current_mirror = get_current_mirror()
+    if current_mirror:
         for name, url in mirrors.items():
             if url == current_mirror:
                 echo(
-                    f"{Status['info']}  当前正在使用 {Colors.GREEN}{name}{Colors.RESET} 镜像源"
+                    f"{Status['info']} 当前正在使用 {Colors.GREEN}{name}{Colors.RESET} 镜像源"
                 )
                 return
-        echo(f"{Status['info']}  当前镜像源({current_mirror})不在ppmm管理的镜像列表中")
+        echo(f"{Status['info']} 当前镜像源({current_mirror})不在ppmm管理的镜像列表中")
         echo(
-            f"{Status['info']}  使用 {Colors.GREEN}mm add <名称> <URL>{Colors.RESET} 命令添加镜像源"
+            f"{Status['info']} 使用 {Colors.GREEN}mm add <名称> <URL>{Colors.RESET} 命令添加镜像源"
         )
-    elif result.stderr:
-        echo(
-            f"{Status['fail']}  获取当前镜像源失败: {result.stderr.strip()}", Colors.RED
-        )
+    else:
+        echo(f"{Status['fail']} 获取当前镜像源失败", Colors.RED)
 
 
 def add(name, url):
@@ -117,7 +114,9 @@ def add(name, url):
     mirrors[name] = url
     save_config()
     echo(f"{Status['success']} 已成功添加镜像源 '{name}'", Colors.GREEN)
-    echo(f"\n{Colors.BLUE}提示:{Colors.RESET} 使用 {Colors.GREEN}mm use {name}{Colors.RESET} 命令切换到此镜像源")
+    echo(
+        f"\n{Colors.BLUE}提示:{Colors.RESET} 使用 {Colors.GREEN}mm use {name}{Colors.RESET} 命令切换到此镜像源"
+    )
 
 
 def rm(name):
@@ -186,12 +185,21 @@ def test_mirror(url, timeout):
         if e.code == 405:
             return test_with_get(url, timeout)
         return f"HTTP错误 ({e.code})"
-    except urllib.error.URLError:
-        return f"超时 (超过 {timeout * 1000} ms)"
+    except urllib.error.URLError as e:
+        # 捕获 URLError 并根据原因进行更详细的判断
+        if isinstance(e.reason, TimeoutError):
+            return "请求超时"
+        elif isinstance(e.reason, ConnectionRefusedError):
+            return "连接被拒绝"
+        elif isinstance(e.reason, socket.gaierror):
+            return "DNS解析失败"
+        return f"URL错误 ({str(e.reason)})"
+    except ValueError as e:
+        return f"URL格式错误 ({str(e)})"
     except http.client.RemoteDisconnected:
         return "连接断开 (服务器无响应)"
     except Exception as e:
-        return f"错误 ({str(e)})"
+        return f"未知错误 ({str(e)})"
 
 
 def test_with_get(url, timeout):
@@ -212,6 +220,7 @@ def test():
     """测试所有镜像源的响应速度"""
     timeout = 5
     results = {}
+    current_mirror = get_current_mirror()
 
     echo(f"{Status['info']} 正在测试镜像源响应速度(超时: {timeout}秒)...", Colors.BLUE)
 
@@ -225,10 +234,19 @@ def test():
             results[name] = future.result()
 
     # 显示测试结果
-    echo("\n镜像源响应速度测试结果:", Colors.BOLD)
-    for name, latency in results.items():
-        color = Colors.GREEN if "ms" in latency else Colors.RED
-        echo(f"  {name.ljust(14)}: {latency}", color)
+    echo(f"\n{Colors.BOLD}镜像源响应速度测试结果:{Colors.RESET}")
+    for name, url in mirrors.items():
+        # 标记当前使用的镜像源
+        star = f"{Colors.GREEN}*{Colors.RESET}" if url == current_mirror else " "
+        latency = results[name]
+        # 包含ms则为正常响应，否则为错误信息
+        if "ms" in latency:
+            latency_value = latency.split()[0]
+            latency_text = f"{Colors.CYAN}{latency_value}{Colors.RESET} ms"
+        else:
+            latency_text = f"{Colors.RED}{latency}{Colors.RESET}"
+
+        echo(f"  {star} {name.ljust(14, '-')} {latency_text}")
     print()
 
 
