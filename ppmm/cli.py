@@ -1,115 +1,70 @@
-import click
-from .config import (
-    get_mirrors,
-    get_current_mirror,
-    add_mirror,
-    remove_mirror,
-    rename_mirror,
-    test_mirrors,
-    use_mirror,
-    print_current_mirror,
-    edit_mirrors
-)
+import argparse
+
+from .core import add, current, edit, help, ls, rename, rm, test, use
 
 
-@click.group()
-def cli():
-    """Python Pip Mirror Manager"""
-    pass
+def main():
+    parser = argparse.ArgumentParser(prog="mm", description="Python Pip 镜像源管理工具")
+    subparsers = parser.add_subparsers(dest="command", help="可用命令")
 
+    # ls 命令
+    subparsers.add_parser("ls", help="列出所有镜像源")
 
-@cli.command()
-def ls():
-    """列出所有可用的镜像"""
-    mirrors = get_mirrors()
-    output_lines = []
-    for name, url in mirrors.items():
-        stars = "*" if url == get_current_mirror().stdout.strip() else " "
-        stars = click.style(stars, fg="green")
-        name += ' '
-        output_lines.append(f"{stars} {name.ljust(14,'-')} {url}")
-    click.echo("\n".join(output_lines))
+    # use 命令
+    use_parser = subparsers.add_parser("use", help="切换到指定镜像源")
+    use_parser.add_argument("name", help="镜像源名称")
 
+    # current 命令
+    subparsers.add_parser("current", help="显示当前使用的镜像源")
 
-@cli.command()
-@click.argument("name")
-def use(name):
-    """切换到指定的镜像"""
-    use_mirror(name)
+    # add 命令
+    add_parser = subparsers.add_parser("add", help="添加新的镜像源")
+    add_parser.add_argument("name", help="新镜像源名称")
+    add_parser.add_argument("url", help="新镜像源URL")
 
+    # rm 命令
+    rm_parser = subparsers.add_parser("rm", help="删除指定的镜像源")
+    rm_parser.add_argument("name", help="要删除的镜像源名称")
 
-@cli.command()
-def test():
-    """测试所有可用的镜像"""
-    mirrors = get_mirrors()
-    current = get_current_mirror().stdout.strip()
-    key = next((key for key, val in mirrors.items() if val == current), None)
-    results = test_mirrors()
-    output_lines = []
-    for name, time in results.items():
-        stars = " "
-        if name == key:
-            stars = click.style("*", fg="green")
-            time = click.style(time, bg="green")
-        name += ' '
-        output_lines.append(f"{stars} {name.ljust(14,'-')} {time}")
-    click.echo("\n".join(output_lines))
+    # rename 命令
+    rename_parser = subparsers.add_parser("rename", help="重命名镜像源")
+    rename_parser.add_argument("old_name", help="当前镜像源名称")
+    rename_parser.add_argument("new_name", help="新的镜像源名称")
 
+    # edit 命令
+    edit_parser = subparsers.add_parser("edit", help="修改指定镜像源的URL")
+    edit_parser.add_argument("name", help="要修改的镜像源名称")
+    edit_parser.add_argument("url", help="新的镜像源URL")
 
-@cli.command()
-def current():
-    """显示当前使用的镜像"""
-    print_current_mirror()
+    # test 命令
+    subparsers.add_parser("test", help="测试所有镜像源的响应速度")
 
+    # help 命令
+    subparsers.add_parser("help", help="显示帮助信息")
 
-@cli.command()
-@click.argument("name")
-@click.argument("url")
-def add(name, url):
-    """添加一个新的镜像"""
-    add_mirror(name, url)
+    args = parser.parse_args()
 
-
-@cli.command()
-@click.argument("name")
-def rm(name):
-    """删除一个已有的镜像"""
-    remove_mirror(name)
-
-
-@cli.command()
-@click.argument("old_name")
-@click.argument("new_name")
-def rename(old_name, new_name):
-    """重命名一个已有的镜像"""
-    rename_mirror(old_name, new_name)
-
-@cli.command()
-@click.argument("name")
-@click.argument("url")
-def edit(name, url):
-    """修改一个已有的镜像"""
-    edit_mirrors(name, url)
-
-@cli.command()
-def help():
-    """显示帮助信息"""
-    help_text = """
-    ppmm: Python Pip Mirror Manager
-    Usage: mm <command>
-        Commands:
-        ls                              List all mirrors
-        use <name>                      Switch to a specific mirror
-        test                            Test all mirrors
-        current                         Show current mirror
-        add <name> <url>                Add a new mirror
-        edit <name> <url>               Edit a mirror
-        rm <name>                       Delete an existing mirror
-        rename <old_name> <new_name>    Rename a mirror
-        help                            Show this help message
-    """
-    click.echo(help_text)
+    if args.command == "ls":
+        ls()
+    elif args.command == "use":
+        use(args.name)
+    elif args.command == "current":
+        current()
+    elif args.command == "add":
+        add(args.name, args.url)
+    elif args.command == "rm":
+        rm(args.name)
+    elif args.command == "rename":
+        rename(args.old_name, args.new_name)
+    elif args.command == "edit":
+        edit(args.name, args.url)
+    elif args.command == "test":
+        test()
+    elif args.command == "help":
+        help()
+    else:
+        parser.print_help()
 
 
 if __name__ == "__main__":
-    cli()
+    main()

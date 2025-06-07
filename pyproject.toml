@@ -1,30 +1,22 @@
-[tool.poetry]
+[project]
 name = "ppmm"
-version = "1.1.10"
-description = "A simple pip mirror management tool"
-authors = ["XuLan <xuzn@msn.com>"]
-license = "MIT"
-readme = "README.md"
-packages = [
-    { include = "ppmm" }
+version = "1.2"
+description = "一个简单的pip镜像管理工具"
+authors = [
+    {name = "XuLan", email = "xuzn@msn.com"}
 ]
-include = ["ppmm/data.json"]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.6"
 
-[tool.poetry.dependencies]
-python = ">=3.6"
-click = "^8.0"
+[project.scripts]
+mm = "ppmm.cli:main"
 
-[tool.poetry.scripts]
-mm = "ppmm.cli:cli"
-ppmm = "ppmm.cli:cli"
+[project.urls]
+repository = "https://github.com/Xu-Lan/ppmm"
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.setuptools]
+include-package-data = true
 
-[tool.poetry.urls]
-"repository" = "https://github.com/Xu-Lan/ppmm"
-
-[[tool.poetry.source]]
-name = "aliyun"
-url = "https://mirrors.aliyun.com/pypi/simple/"
+[tool.setuptools.package-data]
+ppmm = ["data.json"]
