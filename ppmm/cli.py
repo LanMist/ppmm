@@ -42,28 +42,26 @@ def main():
     # help 命令
     subparsers.add_parser("help", help="显示帮助信息")
 
+    # 解析命令行参数
     args = parser.parse_args()
 
-    if args.command == "ls":
-        ls()
-    elif args.command == "use":
-        use(args.name)
-    elif args.command == "current":
-        current()
-    elif args.command == "add":
-        add(args.name, args.url)
-    elif args.command == "rm":
-        rm(args.name)
-    elif args.command == "rename":
-        rename(args.old_name, args.new_name)
-    elif args.command == "edit":
-        edit(args.name, args.url)
-    elif args.command == "test":
-        test()
-    elif args.command == "help":
-        help()
+    command_handlers = {
+        "ls": lambda: ls(),
+        "use": lambda: use(args.name),
+        "current": lambda: current(),
+        "add": lambda: add(args.name, args.url),
+        "rm": lambda: rm(args.name),
+        "rename": lambda: rename(args.old_name, args.new_name),
+        "edit": lambda: edit(args.name, args.url),
+        "test": lambda: test(),
+        "help": lambda: help(),
+    }
+
+    handler = command_handlers.get(args.command)
+    if handler:
+        handler()
     else:
-        parser.print_help()
+        help()
 
 
 if __name__ == "__main__":
